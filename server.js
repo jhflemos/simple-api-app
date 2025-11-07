@@ -1,17 +1,14 @@
 const express = require('express');
 const app = express();
-const PORT = process.env.PORT || 8080;
+const router = express.Router();
 
-// Middleware
-app.use(express.json());
-
-// Health check endpoint for ALB
+// Health check
 app.get('/health', (req, res) => {
   res.status(200).send('OK');
 });
 
-// Sample route
-app.get('/orders', (req, res) => {
+// Define API routes on router
+router.get('/orders', (req, res) => {
   const orders = [
     { id: 1, item: 'Laptop', quantity: 1 },
     { id: 2, item: 'Phone', quantity: 2 },
@@ -20,15 +17,16 @@ app.get('/orders', (req, res) => {
   res.json(orders);
 });
 
-// Get single order by ID
-app.get('/orders/:id', (req, res) => {
+router.get('/orders/:id', (req, res) => {
   const orderId = parseInt(req.params.id);
   const order = { id: orderId, item: 'Monitor', quantity: 1 };
   res.json(order);
 });
 
-app.use('/api', app);
+// Mount router at /api
+app.use('/api', router);
 
+const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
   console.log(`Orders API running on port ${PORT}`);
 });
