@@ -6,12 +6,12 @@ const PORT = process.env.PORT || 8080;
 app.use(express.json());
 
 // Health check endpoint for ALB
-app.get('/health', (req, res) => {
+app.get('/api/health', (req, res) => {
   res.status(200).send('OK');
 });
 
 // Sample route
-app.get('/orders', (req, res) => {
+app.get('/api/orders', (req, res) => {
   const orders = [
     { id: 1, item: 'Laptop', quantity: 1 },
     { id: 2, item: 'Phone', quantity: 2 },
@@ -21,7 +21,7 @@ app.get('/orders', (req, res) => {
 });
 
 // Get single order by ID
-app.get('/orders/:id', (req, res) => {
+app.get('/api/orders/:id', (req, res) => {
   const orderId = parseInt(req.params.id);
   const order = { id: orderId, item: 'Monitor', quantity: 1 };
   res.json(order);
