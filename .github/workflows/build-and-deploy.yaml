@@ -1,0 +1,73 @@
+name: Continuous Integration & Deployment
+
+on:
+  push:
+    branches:
+      - "main"
+      - "dev"
+      - "test"
+    paths-ignore:
+      - "**.md"
+      - ".github/**"
+
+jobs:
+  cicd:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      id-token: write  # Required for OIDC authentication if used
+
+    steps:
+      - name: "setup:checkout-code"
+        uses: actions/checkout@v4
+
+      - name: "setup:set-environment"
+        run: |
+          if [[ "${GITHUB_REF_NAME}" == "main" ]]; then
+            echo "ENVIRONMENT=prod" >> $GITHUB_ENV
+          else
+            echo "ENVIRONMENT=dev" >> $GITHUB_ENV
+          fi
+
+      - name: "setup:configure-aws-credentials"
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::748026688964:role/GitHubActionsAWSRole
+          aws-region: eu-west-1
+
+      - name: "setup:login-ecr"
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: "build:build-and-push"
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          COMMIT_SHA: ${{ github.sha }}
+        run: |
+          GIT_REPOSITORY=$(echo "${{ github.repository }}" | cut -d'/' -f2)
+
+          echo "GIT_REPOSITORY=$GIT_REPOSITORY" >> $GITHUB_ENV
+
+          ECR_REPOSITORY="$ENVIRONMENT-$GIT_REPOSITORY"
+
+          IMAGE_TAG="${{ github.ref_name }}-${COMMIT_SHA::7}"
+          IMAGE_TAG_LATEST="latest"
+
+          echo "Building Docker image..."
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+
+          echo "Tagging image as latest..."
+          docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG_LATEST
+
+          echo "Pushing images to ECR..."
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG_LATEST
+
+      - name: "deploy:deploy-ecs-service"
+        run: |
+          CLUSTER_NAME="$ENVIRONMENT-ecs-cluster"
+          SERVICE_NAME="$GIT_REPOSITORY-$ENVIRONMENT-service"
+          aws ecs update-service --cluster $CLUSTER_NAME --service $SERVICE_NAME --force-new-deployment --region $AWS_REGION
+
+          aws ecs wait services-stable --cluster $CLUSTER_NAME --services $SERVICE_NAME --region $AWS_REGION
