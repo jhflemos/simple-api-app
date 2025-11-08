@@ -8,7 +8,7 @@ app.get('/health', (req, res) => {
 });
 
 // Define API routes on router
-router.get('/orders', (req, res) => {
+router.get('/api/orders', (req, res) => {
   const orders = [
     { id: 1, item: 'Laptop', quantity: 1 },
     { id: 2, item: 'Phone', quantity: 2 },
@@ -17,14 +17,14 @@ router.get('/orders', (req, res) => {
   res.json(orders);
 });
 
-router.get('/orders/:id', (req, res) => {
+router.get('/api/orders/:id', (req, res) => {
   const orderId = parseInt(req.params.id);
   const order = { id: orderId, item: 'Monitor', quantity: 1 };
   res.json(order);
 });
 
 // Mount router at /api
-app.use('/api', router);
+app.use('/', router);
 
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
