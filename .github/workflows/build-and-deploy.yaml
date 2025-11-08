@@ -113,8 +113,8 @@ jobs:
                           | jq -r '.taskDefinition.family')
           TASK_DEF_REVISION=$(aws ecs register-task-definition --cli-input-json file://ecs-task-def-updated.json \
           | jq -r '.taskDefinition.revision')
-          echo "TASK_DEF=$TASK_DEF_ARN:$TASK_DEF_REVISION" >> $GITHUB_ENV
-          echo "task_definition=$TASK_DEF_ARN" >> $GITHUB_OUTPUT
+          echo "TASK_DEF=$TASK_DEF_NAME:$TASK_DEF_REVISION" >> $GITHUB_ENV
+          echo "task_definition=$TASK_DEF" >> $GITHUB_OUTPUT
       
       - name: "buid:generate-appssec.json"
         run: |
