@@ -47,6 +47,18 @@ jobs:
           else
             echo "DEPLOYMENT_STRATEGY=rolling" >> $GITHUB_ENV
           fi
+      
+      - name: "test:unit-test"
+        run: |
+          # This is an example how we can run tests before build
+          echo "Running unit-tests..."
+          echo "Unit-tests finished"
+      
+      - name: "security:snyk-scan"
+        run: |
+          # This is an example how we can run security scan before build
+          echo "Running security scan..."
+          echo "Security scan finished"
 
       - name: "build:build-and-push"
         env:
