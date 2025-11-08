@@ -107,6 +107,12 @@ jobs:
               revision
             }' > ecs-task-def-updated.json
 
+          aws ecs describe-task-definition \
+            --task-definition $GIT_REPOSITORY-$ENVIRONMENT-task-definition \
+            --region $AWS_REGION \
+            --query 'taskDefinition' \
+            --output json
+
           sed -i "s|<IMAGE>|$IMAGE|g" ecs-task-def-updated.json
 
           TASK_DEF_NAME=$(aws ecs register-task-definition --cli-input-json file://ecs-task-def-updated.json | jq -r '.taskDefinition.family')
