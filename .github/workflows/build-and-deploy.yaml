@@ -194,7 +194,7 @@ jobs:
 
           CLUSTER_NAME="$ENVIRONMENT-ecs-cluster"
           SERVICE_NAME="$GIT_REPOSITORY-$ENVIRONMENT-service"
-          TASK_DEF_ARN="arn:aws:ecs:${{ secrets.AWS_REGION }}:${{ secrets.AWS_ACCOUNT }}:task-definition/${{ needs.build.outputs.task_definition }}
+          TASK_DEF_ARN="arn:aws:ecs:${{ secrets.AWS_REGION }}:${{ secrets.AWS_ACCOUNT }}:task-definition/${{ needs.build.outputs.task_definition }}"
 
           if [[ "$DEPLOYMENT_STRATEGY" == "canary" ]]; then
             echo "Triggering CodeDeploy ECS canary deployment..."
