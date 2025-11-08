@@ -34,7 +34,7 @@ jobs:
     outputs:
       environment: ${{ steps.set-environment.outputs.environment }}
       deploy_strategy: ${{ steps.set-strategy.outputs.deploy_strategy }}
-      task_definition_arn: ${{ steps.task-definition.outputs.task_definition_arn }}
+      #task_definition_arn: ${{ steps.task-definition.outputs.task_definition_arn }}
     permissions:
       contents: read
       id-token: write  # Required for OIDC authentication if used
