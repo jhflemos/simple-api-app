@@ -24,7 +24,7 @@ router.get('/orders/:id', (req, res) => {
 });
 
 // Mount router at /api
-app.use('/api', router);
+app.use('/', router);
 
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
