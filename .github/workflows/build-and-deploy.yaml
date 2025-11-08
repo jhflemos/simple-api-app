@@ -103,8 +103,7 @@ jobs:
               executionRoleArn,
               requiresCompatibilities,
               cpu,
-              memory,
-              revision
+              memory
             }' > ecs-task-def-updated.json
 
           sed -i "s|<IMAGE>|$IMAGE|g" ecs-task-def-updated.json
