@@ -195,8 +195,8 @@ jobs:
 
           ls -la
 
-          #if [[ "$DEPLOYMENT_STRATEGY" == "canary" ]]; then
-          #  echo "Triggering CodeDeploy ECS canary deployment..."
+          if [[ "$DEPLOYMENT_STRATEGY" == "canary" ]]; then
+            echo "Triggering CodeDeploy ECS canary deployment..."
 
             APPSPEC_CONTENT=$(jq -c . appspec.json | sed 's/"/\\"/g')
             cat > revision.json <<EOF
