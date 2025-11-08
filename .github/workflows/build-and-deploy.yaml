@@ -32,7 +32,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [pre-build]
     outputs:
-      task_definition_arn: ${{ steps.task-definition.outputs.task_definition_arn }}
+      task_definition: ${{ steps.task-definition.outputs.task_definition }}
     permissions:
       contents: read
       id-token: write  # Required for OIDC authentication if used
@@ -103,20 +103,18 @@ jobs:
               executionRoleArn,
               requiresCompatibilities,
               cpu,
-              memory
+              memory,
+              revision
             }' > ecs-task-def-updated.json
 
-          aws ecs describe-task-definition \
-            --task-definition $GIT_REPOSITORY-$ENVIRONMENT-task-definition \
-            --region $AWS_REGION \
-            --query 'taskDefinition' \
-            --output json
-
           sed -i "s|<IMAGE>|$IMAGE|g" ecs-task-def-updated.json
-          TASK_DEF_ARN=$(aws ecs register-task-definition --cli-input-json file://ecs-task-def-updated.json \
-                          | jq -r '.taskDefinition.taskDefinitionArn')
-          echo "TASK_DEF_ARN=$TASK_DEF_ARN" >> $GITHUB_ENV
-          echo "task_definition_arn=$TASK_DEF_ARN" >> $GITHUB_OUTPUT
+
+          TASK_DEF_NAME=$(aws ecs register-task-definition --cli-input-json file://ecs-task-def-updated.json \
+                          | jq -r '.taskDefinition.family')
+          TASK_DEF_REVISION=$(aws ecs register-task-definition --cli-input-json file://ecs-task-def-updated.json \
+          | jq -r '.taskDefinition.revision')
+          echo "TASK_DEF=$TASK_DEF_ARN:$TASK_DEF_REVISION" >> $GITHUB_ENV
+          echo "task_definition=$TASK_DEF_ARN" >> $GITHUB_OUTPUT
       
       - name: "buid:generate-appssec.json"
         run: |
@@ -196,8 +194,7 @@ jobs:
 
           CLUSTER_NAME="$ENVIRONMENT-ecs-cluster"
           SERVICE_NAME="$GIT_REPOSITORY-$ENVIRONMENT-service"
-          TASK_DEF_ARN="${{ needs.build.outputs.task_definition_arn }}"
-          
+          TASK_DEF_ARN="arn:aws:ecs:${{ secrets.AWS_REGION }}:${{ secrets.AWS_ACCOUNT }}:task-definition/${{ needs.build.outputs.task_definition }}
 
           if [[ "$DEPLOYMENT_STRATEGY" == "canary" ]]; then
             echo "Triggering CodeDeploy ECS canary deployment..."
