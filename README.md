@@ -39,13 +39,30 @@ The GitHub Actions workflow (.github/workflows/build-and-deploy.yaml) automates:
 
 ## API Endpoints
 
-* GET / → Returns a welcome message
+### Health Check
+
+* GET /health → Returns OK status
 ```
-curl http://localhost:8080/
-# Hello, this is a containerized HTTP application!
+curl http://localhost:8080/health
+# OK
 ```
-* GET /greet/<name> → Returns a personalized greeting
+
+### Orders API
+
+* GET /api/orders → Returns a list of all orders
+
 ```
-curl http://localhost:8080/greet/Alice
-# Hello, Alice! Welcome to the containerized app.
+curl http://localhost:8080/api/orders
+# [
+#   { "id": 1, "item": "Laptop", "quantity": 1 },
+#   { "id": 2, "item": "Phone", "quantity": 2 },
+#   { "id": 3, "item": "Keyboard", "quantity": 3 }
+# ]
+```
+
+* GET /api/orders/:id → Returns details of a single order
+```
+curl http://localhost:8080/api/orders/1
+# { "id": 1, "item": "Monitor", "quantity": 1 }
+
 ```
