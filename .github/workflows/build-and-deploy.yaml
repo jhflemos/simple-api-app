@@ -196,64 +196,66 @@ jobs:
           SERVICE_NAME="$GIT_REPOSITORY-$ENVIRONMENT-service"
           TASK_DEF_ARN="arn:aws:ecs:${{ secrets.AWS_REGION }}:${{ secrets.AWS_ACCOUNT }}:task-definition/${{ needs.build.outputs.task_definition }}"
 
-          if [[ "$DEPLOYMENT_STRATEGY" == "canary" ]]; then
-            echo "Triggering CodeDeploy ECS canary deployment..."
+          ls -la
 
-            APPSPEC_CONTENT=$(jq -c . appspec.json | sed 's/"/\\"/g')
-            cat > revision.json <<EOF
-          {
-            "revisionType": "AppSpecContent",
-            "appSpecContent": {
-              "content": "$APPSPEC_CONTENT"
-            }
-          }
-          EOF
-
-            DEPLOYMENT_ID=$(aws deploy create-deployment \
-              --application-name "$GIT_REPOSITORY-$ENVIRONMENT-codedeploy" \
-              --deployment-group-name "$GIT_REPOSITORY-$ENVIRONMENT-canary" \
-              --deployment-config-name "CodeDeployDefault.ECSCanary10Percent5Minutes" \
-              --description "Canary deployment triggered by GHA" \
-              --revision file://revision.json \
-              | jq -r '.deploymentId')
-
-            echo "Deployment started: $DEPLOYMENT_ID"
-            #echo "Waiting for deployment to complete..."
-
-            # Poll until the deployment succeeds or fails
-            #while true; do
-            #  STATUS=$(aws deploy get-deployment --deployment-id $DEPLOYMENT_ID \
-            #          | jq -r '.deploymentInfo.status')
-              
-            #  echo "Current status: $STATUS"
-
-            #  if [[ "$STATUS" == "Succeeded" ]]; then
-            #    echo "Deployment succeeded!"
-            #    break
-            #  elif [[ "$STATUS" == "Failed" ]] || [[ "$STATUS" == "Stopped" ]]; then
-            #    echo "Deployment failed or stopped!"
-            #    exit 1
-            #  else
-            #    sleep 15
-            #  fi
-            #done
-
-            #echo "CodeDeploy canary deployment triggered successfully."
-
-          else
-            echo "Performing standard ECS rolling update..."
-
-            # Update ECS service with new task definition (rolling update)
-            aws ecs update-service \
-              --cluster $CLUSTER_NAME \
-              --service $SERVICE_NAME \
-              --task-definition $TASK_DEF_ARN \
-              --force-new-deployment \
-              --region $AWS_REGION
-
-            # Wait until service stabilizes
-            aws ecs wait services-stable \
-              --cluster $CLUSTER_NAME \
-              --services $SERVICE_NAME \
-              --region $AWS_REGION
-          fi
+          #if [[ "$DEPLOYMENT_STRATEGY" == "canary" ]]; then
+          #  echo "Triggering CodeDeploy ECS canary deployment..."
+#
+          #  APPSPEC_CONTENT=$(jq -c . appspec.json | sed 's/"/\\"/g')
+          #  cat > revision.json <<EOF
+          #{
+          #  "revisionType": "AppSpecContent",
+          #  "appSpecContent": {
+          #    "content": "$APPSPEC_CONTENT"
+          #  }
+          #}
+          #EOF
+#
+          #  DEPLOYMENT_ID=$(aws deploy create-deployment \
+          #    --application-name "$GIT_REPOSITORY-$ENVIRONMENT-codedeploy" \
+          #    --deployment-group-name "$GIT_REPOSITORY-$ENVIRONMENT-canary" \
+          #    --deployment-config-name "CodeDeployDefault.ECSCanary10Percent5Minutes" \
+          #    --description "Canary deployment triggered by GHA" \
+          #    --revision file://revision.json \
+          #    | jq -r '.deploymentId')
+#
+          #  echo "Deployment started: $DEPLOYMENT_ID"
+          #  #echo "Waiting for deployment to complete..."
+#
+          #  # Poll until the deployment succeeds or fails
+          #  #while true; do
+          #  #  STATUS=$(aws deploy get-deployment --deployment-id $DEPLOYMENT_ID \
+          #  #          | jq -r '.deploymentInfo.status')
+          #    
+          #  #  echo "Current status: $STATUS"
+#
+          #  #  if [[ "$STATUS" == "Succeeded" ]]; then
+          #  #    echo "Deployment succeeded!"
+          #  #    break
+          #  #  elif [[ "$STATUS" == "Failed" ]] || [[ "$STATUS" == "Stopped" ]]; then
+          #  #    echo "Deployment failed or stopped!"
+          #  #    exit 1
+          #  #  else
+          #  #    sleep 15
+          #  #  fi
+          #  #done
+#
+          #  #echo "CodeDeploy canary deployment triggered successfully."
+#
+          #else
+          #  echo "Performing standard ECS rolling update..."
+#
+          #  # Update ECS service with new task definition (rolling update)
+          #  aws ecs update-service \
+          #    --cluster $CLUSTER_NAME \
+          #    --service $SERVICE_NAME \
+          #    --task-definition $TASK_DEF_ARN \
+          #    --force-new-deployment \
+          #    --region $AWS_REGION
+#
+          #  # Wait until service stabilizes
+          #  aws ecs wait services-stable \
+          #    --cluster $CLUSTER_NAME \
+          #    --services $SERVICE_NAME \
+          #    --region $AWS_REGION
+          #fi
